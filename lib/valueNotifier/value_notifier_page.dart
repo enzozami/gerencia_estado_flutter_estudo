@@ -5,29 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_default_state_manager/widgets/imc_gauge.dart';
 import 'package:intl/intl.dart';
 
-class ImcSetstatePage extends StatefulWidget {
-  const ImcSetstatePage({super.key});
+class ValueNotifierPage extends StatefulWidget {
+  const ValueNotifierPage({super.key});
 
   @override
-  State<ImcSetstatePage> createState() => _ImcSetstatePageState();
+  State<ValueNotifierPage> createState() => _ValueNotifierPageState();
 }
 
-class _ImcSetstatePageState extends State<ImcSetstatePage> {
+class _ValueNotifierPageState extends State<ValueNotifierPage> {
   final formKey = GlobalKey<FormState>();
   final pesoEC = TextEditingController();
   final alturaEC = TextEditingController();
-  var imc = 0.0;
+  var imc = ValueNotifier(0.0);
 
   Future<void> _calcularIMC({required double peso, required double altura}) async {
-    setState(() {
-      imc = 0;
-    });
+    // dessa forma nao rebuilda a tela igual o setstate
+    // ele rebuilda apenas o metodo valuelistenablebuilder
+    imc.value = 0;
 
     await Future.delayed(Duration(seconds: 2));
 
-    setState(() {
-      imc = peso / pow(altura, 2);
-    });
+    imc.value = peso / pow(altura, 2);
   }
 
   @override
@@ -41,7 +39,7 @@ class _ImcSetstatePageState extends State<ImcSetstatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IMC Set State'),
+        title: const Text('IMC Value Notifier'),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -50,7 +48,12 @@ class _ImcSetstatePageState extends State<ImcSetstatePage> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                ImcGauge(imc: imc),
+                ValueListenableBuilder<double>(
+                  valueListenable: imc,
+                  builder: (_, imcValue, __) {
+                    return ImcGauge(imc: imcValue);
+                  },
+                ),
                 SizedBox(
                   height: 20,
                 ),
